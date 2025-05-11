@@ -23,6 +23,10 @@ export async function POST(request: Request) {
       .search({
         q: query,
         query_by: 'title,category,keywords,description',
+        highlight_full_fields: 'title,description',
+        highlight_affix_num_tokens: 5,
+        highlight_start_tag: '<mark>',
+        highlight_end_tag: '</mark>',
       });
 
     return NextResponse.json(searchResults);
