@@ -16,21 +16,23 @@ export default function HomePage() {
   const [results, setResults] = useState<Result[]>([]);
 
   const handleSearch = async (query: string) => {
-    try {
-      const searchResults = await typesenseClient
-        .collections('services')
-        .documents()
-        .search({
-          q: query,
-          query_by: 'title,category,keywords,description',
-        });
+  try {
+    const searchResults = await typesenseClient
+      .collections('services')
+      .documents()
+      .search({
+        q: query,
+        query_by: 'title,category,keywords,description',
+      });
 
-      setResults(searchResults.hits.map((hit: any) => hit.document));
-    } catch (error) {
-      console.error('Search error:', error);
-      setResults([]);
-    }
-  };
+    const hits = searchResults.hits?.map((hit: any) => hit.document) || [];
+    setResults(hits);
+
+  } catch (error) {
+    console.error('Search error:', error);
+    setResults([]);
+  }
+};
 
     return (
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
