@@ -1,0 +1,61 @@
+.tabContainer {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.tabList {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1rem;
+}
+
+.tabButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  color: #4a5568;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.tabButton::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+
+.tabButton:hover {
+  color: #2d3748;
+}
+
+.tabButton.active {
+  color: #4299e1;
+}
+
+.tabButton.active::after {
+  background-color: #4299e1;
+}
+
+.tabPanel {
+  padding: 1rem 0;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 
