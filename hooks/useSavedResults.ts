@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth, db } from '../lib/firebase';
+import { auth, db, isFirebaseInitialized } from '../lib/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import {
   doc,
@@ -19,13 +19,15 @@ export interface SavedResult {
 }
 
 export const useSavedResults = (resultId: string) => {
-  const [user] = useAuthState(auth);
+  // Only call useAuthState if Firebase is initialized
+  const [user] = useAuthState(auth!);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkIfSaved = async () => {
-      if (!user) {
+      if (!isFirebaseInitialized() || !user || !db) {
         setIsSaved(false);
         setIsLoading(false);
         return;
@@ -35,8 +37,10 @@ export const useSavedResults = (resultId: string) => {
         const savedRef = doc(db, 'users', user.uid, 'savedResults', resultId);
         const savedDoc = await getDoc(savedRef);
         setIsSaved(savedDoc.exists());
+        setError(null);
       } catch (error) {
         console.error('Error checking saved status:', error);
+        setError('Failed to check saved status');
       }
       setIsLoading(false);
     };
@@ -45,9 +49,8 @@ export const useSavedResults = (resultId: string) => {
   }, [user, resultId]);
 
   const toggleSaved = async (result: SavedResult) => {
-    if (!user) {
-      // Handle not logged in state - you might want to trigger a login prompt
-      console.log('User must be logged in to save results');
+    if (!isFirebaseInitialized() || !user || !db) {
+      setError('Firebase is not initialized or user is not logged in');
       return;
     }
 
@@ -64,10 +67,12 @@ export const useSavedResults = (resultId: string) => {
         });
         setIsSaved(true);
       }
+      setError(null);
     } catch (error) {
       console.error('Error toggling saved status:', error);
+      setError('Failed to update saved status');
     }
   };
 
-  return { isSaved, isLoading, toggleSaved };
+  return { isSaved, isLoading, error, toggleSaved };
 }; 

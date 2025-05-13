@@ -28,5 +28,7 @@ export const analytics = typeof window !== 'undefined' && app
   ? isSupported().then(() => getAnalytics(app))
   : null;
 
-// Export a function to check if Firebase is configured
-export const isFirebaseInitialized = () => !!app; 
+// Export a function to check if Firebase is configured and initialized
+export const isFirebaseInitialized = () => {
+  return !!app && !!auth && !!db;
+}; 
