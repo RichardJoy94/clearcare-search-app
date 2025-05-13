@@ -1,13 +1,16 @@
+'use client';
+
 import { createContext, useContext, ReactNode } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../lib/firebase';
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { auth, isFirebaseInitialized } from '@/lib/firebase';
+import { GoogleAuthProvider, signInWithPopup, signOut, Auth } from 'firebase/auth';
 
 interface AuthContextType {
   user: any;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  isInitialized: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -15,9 +18,16 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, loading] = useAuthState(auth);
+  // Provide default values when auth is null
+  const [user, loading] = auth ? useAuthState(auth as Auth) : [null, false];
+  const isInitialized = isFirebaseInitialized();
 
   const signInWithGoogle = async () => {
+    if (!isInitialized || !auth) {
+      console.error('Firebase is not initialized');
+      return;
+    }
+    
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
@@ -27,6 +37,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    if (!isInitialized || !auth) {
+      console.error('Firebase is not initialized');
+      return;
+    }
+
     try {
       await signOut(auth);
     } catch (error) {
@@ -39,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signInWithGoogle,
     logout,
+    isInitialized
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
