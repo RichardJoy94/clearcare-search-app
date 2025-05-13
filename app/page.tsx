@@ -3,6 +3,42 @@ import { useState } from 'react';
 import { SearchResult } from './types';
 import Tabs from './components/Tabs';
 import styles from './page.module.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { analytics } from '@/lib/analytics';
+
+const ShareIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+  </svg>
+);
+
+const SaveIcon = ({ isSaved }: { isSaved: boolean }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill={isSaved ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width="20"
+    height="20"
+  >
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
 
 export default function HomePage() {
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -10,8 +46,14 @@ export default function HomePage() {
   const [sortOrder, setSortOrder] = useState<string>('none');
   const [lastQuery, setLastQuery] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [userZipCode, setUserZipCode] = useState<string>('');
+  const [maxDistance, setMaxDistance] = useState<number>(10); // Default 10 miles
+  const [visibleResults, setVisibleResults] = useState<number>(3);
+  const [shareTooltip, setShareTooltip] = useState<string | null>(null);
+  const [savedResults, setSavedResults] = useState<Set<string>>(new Set());
 
   const categories = ['All', 'Vaccinations', 'Imaging', 'Lab Tests', 'Primary Care'];
+  const distanceOptions = [5, 10, 25, 50, 100];
 
   const handleSearch = async (query: string) => {
     setLoading(true);
@@ -19,7 +61,11 @@ export default function HomePage() {
       const response = await fetch('/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ 
+          query,
+          zipCode: userZipCode,
+          maxDistance 
+        }),
       });
 
       const searchResults = await response.json();
@@ -30,6 +76,9 @@ export default function HomePage() {
 
       setResults(hits);
       setLastQuery(query);
+      
+      // Track search analytics
+      analytics.trackSearch(query, hits.length);
     } catch (error) {
       console.error('Search error:', error);
       setResults([]);
@@ -48,17 +97,78 @@ export default function HomePage() {
     return 0;
   });
 
+  const displayedResults = sortedResults.slice(0, visibleResults);
+  const hasMoreResults = sortedResults.length > visibleResults;
+
+  const handleShowMore = () => {
+    setVisibleResults(prev => prev + 3);
+  };
+
+  // Function to handle saving/unsaving results
+  const toggleSaveResult = (resultId: string) => {
+    setSavedResults(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(resultId)) {
+        newSet.delete(resultId);
+      } else {
+        newSet.add(resultId);
+      }
+      // Here you would typically sync with your site-wide auth system
+      return newSet;
+    });
+  };
+
+  // Function to track location link clicks
+  const trackLocationClick = (locationName: string, resultId: string) => {
+    // Here you would implement your analytics tracking
+    console.log(`Location click: ${locationName} for result ${resultId}`);
+  };
+
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>Healthcare Price Transparency</h1>
       
       <div className={styles.searchContainer}>
-        <input
-          type="search"
-          placeholder="Search healthcare services..."
-          onChange={(e) => handleSearch(e.target.value)}
-          className={styles.searchInput}
-        />
+        <div className={styles.searchRow}>
+          <input
+            type="search"
+            placeholder="Search healthcare services..."
+            onChange={(e) => handleSearch(e.target.value)}
+            className={styles.searchInput}
+          />
+          <div className={styles.locationFilters}>
+            <input
+              type="text"
+              placeholder="Enter ZIP code"
+              value={userZipCode}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                setUserZipCode(value);
+                if (value.length === 5 && lastQuery) {
+                  handleSearch(lastQuery);
+                }
+              }}
+              className={styles.zipInput}
+              maxLength={5}
+            />
+            <select
+              value={maxDistance}
+              onChange={(e) => {
+                setMaxDistance(Number(e.target.value));
+                if (lastQuery) {
+                  handleSearch(lastQuery);
+                }
+              }}
+              className={styles.distanceSelect}
+            >
+              {distanceOptions.map((distance) => (
+                <option key={distance} value={distance}>
+                  Within {distance} miles
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className={styles.filters}>
@@ -102,20 +212,63 @@ export default function HomePage() {
       ) : (
         <>
           <div className={styles.resultsSummary}>
-            {`Showing ${sortedResults.length} result${
+            {`Showing ${displayedResults.length} of ${sortedResults.length} result${
               sortedResults.length !== 1 ? 's' : ''
-            }${lastQuery ? ` for "${lastQuery}"` : ''}`}
+            }${lastQuery ? ` for "${lastQuery}"` : ''}${
+              userZipCode ? ` near ${userZipCode}` : ''
+            }`}
           </div>
 
           <ul className={styles.results}>
-            {sortedResults.map((result) => (
+            {displayedResults.map((result) => (
               <li key={result.id} className={styles.resultCard}>
-                <h3
-                  className={styles.resultTitle}
-                  dangerouslySetInnerHTML={{
-                    __html: result._highlight?.title?.[0] || result.title,
-                  }}
-                />
+                <div className={styles.cardHeader}>
+                  <h3
+                    className={styles.resultTitle}
+                    dangerouslySetInnerHTML={{
+                      __html: result._highlight?.title?.[0] || result.title,
+                    }}
+                  />
+                  <div className={styles.cardActions}>
+                    <motion.button
+                      className={`${styles.actionButton} ${savedResults.has(result.id) ? styles.saved : ''}`}
+                      onClick={() => toggleSaveResult(result.id)}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      title={savedResults.has(result.id) ? "Remove from saved" : "Save this result"}
+                    >
+                      <SaveIcon isSaved={savedResults.has(result.id)} />
+                    </motion.button>
+                    <motion.button
+                      className={styles.shareButton}
+                      onClick={() => {
+                        const shareUrl = `${window.location.origin}?service=${encodeURIComponent(result.title)}`;
+                        navigator.clipboard.writeText(shareUrl).then(() => {
+                          setShareTooltip(result.id);
+                          setTimeout(() => setShareTooltip(null), 2000);
+                        });
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      title="Share this service"
+                    >
+                      <ShareIcon />
+                      Share
+                      <AnimatePresence>
+                        {shareTooltip === result.id && (
+                          <motion.span
+                            className={styles.tooltip}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                          >
+                            Link copied!
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  </div>
+                </div>
                 <Tabs
                   tabs={[
                     {
@@ -139,6 +292,11 @@ export default function HomePage() {
                             <strong>Price Range:</strong> ${result.price_min.toLocaleString()} - $
                             {result.price_max.toLocaleString()}
                           </p>
+                          {result.distance && (
+                            <p className={styles.distance}>
+                              <strong>Distance:</strong> {result.distance.toFixed(1)} miles away
+                            </p>
+                          )}
                         </div>
                       ),
                     },
@@ -146,14 +304,50 @@ export default function HomePage() {
                       label: 'Location',
                       content: (
                         <div className={styles.resultContent}>
-                          <p><strong>Primary Location:</strong> {result.location || 'Main Medical Center'}</p>
-                          <p><strong>Distance:</strong> {result.distance || '< 5'} miles</p>
-                          <p><strong>Available Locations:</strong></p>
-                          <ul className={styles.locationList}>
-                            <li>Main Medical Center - 1234 Healthcare Ave</li>
-                            <li>Downtown Clinic - 567 Wellness St</li>
-                            <li>West Side Medical - 890 Healing Blvd</li>
-                          </ul>
+                          <div className={styles.locationInfo}>
+                            <p>
+                              <strong>Primary Location:</strong>{' '}
+                              <span>{result.location || 'Main Medical Center'}</span>
+                              {result.distance && (
+                                <span className={styles.distance}>
+                                  {result.distance.toFixed(1)} miles away
+                                </span>
+                              )}
+                            </p>
+                            <p><strong>Other Locations:</strong></p>
+                            <ul className={styles.locationList}>
+                              <li>
+                                <span>Downtown Clinic</span>
+                                <div className={styles.locationActions}>
+                                  <span className={styles.locationMeta}>8AM-6PM</span>
+                                  <a
+                                    href="https://example.com/downtown-clinic"
+                                    className={styles.locationLink}
+                                    onClick={() => trackLocationClick('Downtown Clinic', result.id)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    Visit Website →
+                                  </a>
+                                </div>
+                              </li>
+                              <li>
+                                <span>West Side Medical</span>
+                                <div className={styles.locationActions}>
+                                  <span className={styles.locationMeta}>7AM-8PM</span>
+                                  <a
+                                    href="https://example.com/westside-medical"
+                                    className={styles.locationLink}
+                                    onClick={() => trackLocationClick('West Side Medical', result.id)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    Visit Website →
+                                  </a>
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
                       ),
                     },
@@ -177,6 +371,17 @@ export default function HomePage() {
               </li>
             ))}
           </ul>
+
+          {hasMoreResults && (
+            <motion.button
+              className={styles.showMoreButton}
+              onClick={handleShowMore}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Show More Results
+            </motion.button>
+          )}
         </>
       )}
     </main>

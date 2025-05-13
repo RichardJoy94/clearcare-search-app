@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TabData } from '@/app/types';
 import styles from './Tabs.module.css';
 
@@ -24,21 +25,30 @@ export default function Tabs({ tabs, defaultTab = 0 }: TabsProps) {
             onClick={() => setActiveTab(index)}
           >
             {tab.label}
+            {activeTab === index && (
+              <motion.div
+                className={styles.activeIndicator}
+                layoutId="activeIndicator"
+              />
+            )}
           </button>
         ))}
       </div>
-      {tabs.map((tab, index) => (
-        <div
-          key={index}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
           role="tabpanel"
-          id={`tab-panel-${index}`}
-          aria-labelledby={`tab-${index}`}
-          hidden={activeTab !== index}
+          id={`tab-panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
           className={styles.tabPanel}
         >
-          {tab.content}
-        </div>
-      ))}
+          {tabs[activeTab].content}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 } 

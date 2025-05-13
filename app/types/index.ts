@@ -7,6 +7,12 @@ export interface SearchResult {
   price_max: number;
   location?: string;
   distance?: number;
+  zipCode?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  providerUrl?: string;
   _highlight?: {
     title?: string[];
     description?: string[];
@@ -23,9 +29,16 @@ export interface SearchState {
   visibleCount: number;
   loading: boolean;
   error: string | null;
+  userZipCode: string;
+  maxDistance: number;
 }
 
 export interface TabData {
   label: string;
   content: React.ReactNode;
+}
+
+export interface LocationFilter {
+  zipCode: string;
+  maxDistance: number;
 } 
