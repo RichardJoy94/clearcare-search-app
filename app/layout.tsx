@@ -8,7 +8,7 @@ const inter = Inter({
   display: 'swap',
 });
 
-const GA_MEASUREMENT_ID = 'G-SH9QQ0KBSJ';
+const GA_MEASUREMENT_ID = 'G-YTQPP7RV81';
 
 export const metadata: Metadata = {
   title: "Healthcare Price Transparency",

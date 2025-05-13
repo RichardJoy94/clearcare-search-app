@@ -14,7 +14,7 @@ declare global {
   }
 }
 
-const GA_TRACKING_ID = 'G-SH9QQ0KBSJ';
+const GA_TRACKING_ID = 'G-YTQPP7RV81';
 
 class Analytics {
   private static instance: Analytics;
