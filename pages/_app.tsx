@@ -3,7 +3,7 @@ import type { AppProps } from 'next/app';
 import { AuthProvider } from '../contexts/AuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { analytics } from '@/lib/analytics';
-import '../styles/globals.css';
+import '@/app/globals.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
