@@ -33,6 +33,12 @@ export default function AdminPage() {
   }, []);
 
   const loadUrls = async () => {
+    if (!db) {
+      setError('Firebase is not initialized');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const urlsCollection = collection(db, 'providerUrls');
       const snapshot = await getDocs(urlsCollection);
@@ -53,6 +59,11 @@ export default function AdminPage() {
     setError('');
     setSuccess('');
 
+    if (!db) {
+      setError('Firebase is not initialized');
+      return;
+    }
+
     try {
       const urlDoc = doc(collection(db, 'providerUrls'));
       await setDoc(urlDoc, {
@@ -68,6 +79,11 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!db) {
+      setError('Firebase is not initialized');
+      return;
+    }
+
     try {
       await deleteDoc(doc(db, 'providerUrls', id));
       setSuccess('URL deleted successfully');

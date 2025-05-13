@@ -14,8 +14,13 @@ const nextConfig = {
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false };
+    // Handle ESM modules
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts', '.tsx'],
+    };
     return config;
   },
+  transpilePackages: ['debug', 'supports-color'],
 };
 
 module.exports = withPWA(nextConfig); 
