@@ -8,26 +8,25 @@ const withPWA = require('next-pwa')({
 
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   experimental: {
-    appDir: true,
+    appDir: true
   },
   webpack: (config, { isServer }) => {
     config.resolve.fallback = { 
       fs: false,
       net: false,
       tls: false,
-      dns: false,
-      'stripe': false
+      dns: false
     };
-    
-    config.resolve.extensionAlias = {
-      '.js': ['.js', '.ts', '.tsx'],
+
+    // Add resolution for undici
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'undici': false  // This tells webpack to use Node.js built-in fetch instead
     };
 
     return config;
-  },
-  transpilePackages: ['debug', 'supports-color', 'undici', 'firebase'],
+  }
 };
 
 module.exports = withPWA(nextConfig);
