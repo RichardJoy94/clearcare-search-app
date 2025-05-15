@@ -9,28 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "debug": "4.3.4",
-    "firebase": "^11.7.3",
-    "framer-motion": "10.16.4",
-    "lodash": "4.17.21",
-    "lodash.debounce": "^4.0.8",
+    "@types/node": "20.11.16",
+    "@types/react": "18.2.55",
+    "@types/react-dom": "18.2.19",
+    "firebase": "^10.8.0",
+    "firebase-admin": "^12.0.0",
+    "framer-motion": "^11.0.3",
     "next": "13.4.19",
     "next-pwa": "^5.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-firebase-hooks": "^5.1.1",
-    "supports-color": "^9.4.0",
-    "typesense": "1.7.1"
+    "stripe": "^14.14.0",
+    "@types/stripe": "^8.0.417",
+    "typescript": "5.3.3"
   },
   "devDependencies": {
     "@types/lodash": "4.14.202",
     "@types/lodash.debounce": "^4.0.9",
-    "@types/node": "20.8.0",
-    "@types/react": "18.2.24",
-    "@types/react-dom": "18.2.8",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.5",
-    "typescript": "5.2.2"
+    "tailwindcss": "^3.3.5"
   }
 }
