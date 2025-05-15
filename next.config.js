@@ -8,9 +8,6 @@ const withPWA = require('next-pwa')({
 
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    appDir: true
-  },
   webpack: (config, { isServer }) => {
     config.resolve.fallback = { 
       fs: false,

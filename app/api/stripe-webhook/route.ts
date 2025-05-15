@@ -20,8 +20,11 @@ export async function POST(request: Request) {
     const headersList = headers();
     const signature = headersList.get('stripe-signature');
 
-    if (!signature) {
-      return NextResponse.json({ error: 'No signature found' }, { status: 400 });
+    if (!signature || !webhookSecret) {
+      return NextResponse.json(
+        { error: !signature ? 'No signature found' : 'Webhook secret not configured' },
+        { status: 400 }
+      );
     }
 
     let event;
@@ -68,10 +71,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ received: true });
-  } catch (error: any) {
-    console.error('Error handling webhook:', error.message);
+  } catch (err) {
+    console.error('Error processing webhook:', err);
     return NextResponse.json(
-      { error: error.message || 'Webhook handler failed' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
