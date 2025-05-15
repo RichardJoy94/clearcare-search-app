@@ -1,10 +1,16 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SearchResult } from './types';
 import Tabs from './components/Tabs';
 import styles from './page.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analytics } from '@/lib/analytics';
+import { useAuth } from '@/lib/AuthContext';
+import { db } from '@/lib/firebaseClient';
+import { doc, setDoc, deleteDoc, collection } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { saveSearch } from '@/lib/firestore';
+import PricingInsight from './components/PricingInsight/PricingInsight';
 
 const ShareIcon = () => (
   <svg
@@ -51,9 +57,26 @@ export default function HomePage() {
   const [visibleResults, setVisibleResults] = useState<number>(3);
   const [shareTooltip, setShareTooltip] = useState<string | null>(null);
   const [savedResults, setSavedResults] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
+  const router = useRouter();
 
   const categories = ['All', 'Vaccinations', 'Imaging', 'Lab Tests', 'Primary Care'];
   const distanceOptions = [5, 10, 25, 50, 100];
+
+  // Handle URL parameters for saved searches
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const searchTerm = params.get('term');
+    const category = params.get('category');
+    
+    if (searchTerm) {
+      handleSearch(searchTerm);
+      setLastQuery(searchTerm);
+    }
+    if (category) {
+      setActiveCategory(category);
+    }
+  }, []);
 
   const handleSearch = async (query: string) => {
     setLoading(true);
@@ -105,23 +128,72 @@ export default function HomePage() {
   };
 
   // Function to handle saving/unsaving results
-  const toggleSaveResult = (resultId: string) => {
-    setSavedResults(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(resultId)) {
-        newSet.delete(resultId);
+  const toggleSaveResult = async (resultId: string) => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const savedRef = doc(db, 'users', user.uid, 'savedSearches', resultId);
+      
+      if (savedResults.has(resultId)) {
+        await deleteDoc(savedRef);
+        setSavedResults(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(resultId);
+          return newSet;
+        });
       } else {
-        newSet.add(resultId);
+        const searchData = {
+          id: resultId,
+          userId: user.uid,
+          savedAt: new Date().toISOString(),
+          searchResult: results.find(r => r.id === resultId),
+        };
+        
+        await setDoc(savedRef, searchData);
+        setSavedResults(prev => {
+          const newSet = new Set(prev);
+          newSet.add(resultId);
+          return newSet;
+        });
       }
-      // Here you would typically sync with your site-wide auth system
-      return newSet;
-    });
+    } catch (error) {
+      console.error('Error toggling save:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   // Function to track location link clicks
   const trackLocationClick = (locationName: string, resultId: string) => {
     // Here you would implement your analytics tracking
     console.log(`Location click: ${locationName} for result ${resultId}`);
+  };
+
+  const handleSaveSearch = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      await saveSearch(user.uid, {
+        term: lastQuery,
+        category: activeCategory,
+        filters: [sortOrder],
+        results: results
+      });
+      
+      // Show success message
+      analytics.trackEvent('search_saved', {
+        term: lastQuery,
+        category: activeCategory,
+        filters: [sortOrder]
+      });
+    } catch (error) {
+      console.error('Error saving search:', error);
+    }
   };
 
   return (
@@ -212,11 +284,23 @@ export default function HomePage() {
       ) : (
         <>
           <div className={styles.resultsSummary}>
-            {`Showing ${displayedResults.length} of ${sortedResults.length} result${
-              sortedResults.length !== 1 ? 's' : ''
-            }${lastQuery ? ` for "${lastQuery}"` : ''}${
-              userZipCode ? ` near ${userZipCode}` : ''
-            }`}
+            <div className={styles.resultCount}>
+              {`Showing ${displayedResults.length} of ${sortedResults.length} result${
+                sortedResults.length !== 1 ? 's' : ''
+              }${lastQuery ? ` for "${lastQuery}"` : ''}${
+                userZipCode ? ` near ${userZipCode}` : ''
+              }`}
+            </div>
+            {results.length > 0 && user && (
+              <motion.button
+                className={styles.saveSearchButton}
+                onClick={handleSaveSearch}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Save Search
+              </motion.button>
+            )}
           </div>
 
           <ul className={styles.results}>
@@ -297,6 +381,15 @@ export default function HomePage() {
                               <strong>Distance:</strong> {result.distance.toFixed(1)} miles away
                             </p>
                           )}
+                          <PricingInsight
+                            serviceId={result.id}
+                            averageCost={Math.floor((result.price_min + result.price_max) / 2)}
+                            nationalRange={{
+                              min: Math.floor(result.price_min * 0.8),
+                              max: Math.floor(result.price_max * 1.2)
+                            }}
+                            trend={result.price_min > 1000 ? 'up' : result.price_min > 500 ? 'stable' : 'down'}
+                          />
                         </div>
                       ),
                     },

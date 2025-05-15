@@ -3,10 +3,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './Navigation.module.css';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/lib/AuthContext';
+import { auth } from '@/lib/firebaseClient';
+import { signOut } from 'firebase/auth';
 
 export default function Navigation() {
   const pathname = usePathname();
-  const isLoggedIn = false; // Placeholder for auth state
+  const { user } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <nav className={styles.nav}>
@@ -17,14 +28,14 @@ export default function Navigation() {
       </div>
 
       <div className={styles.links}>
-        <Link href="/about" className={styles.link}>About</Link>
-        <Link href="/services" className={styles.link}>Services</Link>
-        <Link href="/blog" className={styles.link}>Blog</Link>
-        <Link href="/contact" className={styles.link}>Contact</Link>
+        <a href="https://clearcarehq.com/about" target="_blank" rel="noopener noreferrer" className={styles.link}>About</a>
+        <a href="https://app.clearcarehq.com" className={styles.link}>Services</a>
+        <a href="https://clearcarehq.com/blog" target="_blank" rel="noopener noreferrer" className={styles.link}>Blog</a>
+        <a href="https://clearcarehq.com/contact" target="_blank" rel="noopener noreferrer" className={styles.link}>Contact</a>
       </div>
 
-      <div className={styles.authLinks}>
-        {isLoggedIn ? (
+      <div>
+        {user ? (
           <motion.div 
             className={styles.accountContainer}
             initial={false}
@@ -37,6 +48,12 @@ export default function Navigation() {
             >
               My Account
             </Link>
+            <button 
+              onClick={handleLogout}
+              className={styles.logoutButton}
+            >
+              Log Out
+            </button>
           </motion.div>
         ) : (
           <motion.div 

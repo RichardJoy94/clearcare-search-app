@@ -113,6 +113,23 @@
   background-color: #0d9488;
 }
 
+.logoutButton {
+  background-color: #ef4444;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin-left: 1rem;
+  transition: background-color 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: #dc2626;
+}
+
 @media (max-width: 768px) {
   .nav {
     padding: 1rem;

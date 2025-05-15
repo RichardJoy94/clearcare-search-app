@@ -1,4 +1,4 @@
-type EventType = 'search' | 'view_result' | 'save_result' | 'share_result' | 'provider_click';
+type EventType = 'search' | 'view_result' | 'save_result' | 'share_result' | 'provider_click' | 'search_saved';
 
 interface EventProperties {
   [key: string]: any;

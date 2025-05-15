@@ -12,12 +12,18 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.resolve.fallback = { fs: false };
     // Handle ESM modules
     config.resolve.extensionAlias = {
       '.js': ['.js', '.ts', '.tsx'],
     };
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'stripe': require.resolve('stripe'),
+      };
+    }
     return config;
   },
   transpilePackages: ['debug', 'supports-color'],

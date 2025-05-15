@@ -1,0 +1,223 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.hero h1 {
+  color: #0f766e;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.hero p {
+  color: #64748b;
+  font-size: 1.25rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.pricingTable {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 3rem;
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  margin-top: 1rem;
+}
+
+.featureColumn {
+  padding: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.planColumn {
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.proColumn {
+  background-color: #f0fdfa;
+  border-left: 2px solid #e2e8f0;
+}
+
+.proLabel {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f766e;
+  color: white;
+  padding: 0.35rem 1.5rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(15, 118, 110, 0.3);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.planColumn h3 {
+  color: #1e293b;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.price {
+  color: #0f766e;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.price span {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.tableBody {
+  border-radius: 0 0 1rem 1rem;
+  overflow: hidden;
+}
+
+.featureRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s;
+}
+
+.featureRow:last-child {
+  border-bottom: none;
+}
+
+.featureRow:hover {
+  background-color: #f8fafc;
+}
+
+.featureName {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.featureDescription {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.featureValue {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proValue {
+  background-color: #f0fdfa;
+  border-left: 2px solid #e2e8f0;
+}
+
+.checkIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #22c55e;
+}
+
+.crossIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #ef4444;
+}
+
+.locked {
+  color: #ef4444;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.fullAccess {
+  color: #22c55e;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.comingSoon {
+  color: #f59e0b;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.ctaSection {
+  text-align: center;
+}
+
+.upgradeButton {
+  background-color: #0f766e;
+  color: white;
+  padding: 1rem 3rem;
+  border-radius: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1.5rem;
+}
+
+.upgradeButton:hover {
+  background-color: #0d9488;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.guarantee {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 2rem 1rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .hero p {
+    font-size: 1.125rem;
+  }
+
+  .tableHeader,
+  .featureRow {
+    grid-template-columns: 1.5fr 1fr 1fr;
+  }
+
+  .featureName,
+  .featureValue {
+    padding: 1rem;
+  }
+
+  .featureDescription {
+    display: none;
+  }
+} 
