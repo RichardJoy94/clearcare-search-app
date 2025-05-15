@@ -1,0 +1,139 @@
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: white;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logoImage {
+  height: 40px;
+  width: auto;
+  transition: transform 0.2s ease;
+}
+
+.logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #006B77;
+}
+
+.logo a:hover .logoImage {
+  transform: scale(1.02);
+}
+
+.links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.link {
+  color: #334155;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #0f766e;
+}
+
+.authLinks {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.authContainer {
+  display: flex;
+  gap: 1rem;
+}
+
+.loginButton {
+  color: #0f766e;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.loginButton:hover {
+  background-color: #f0fdfa;
+}
+
+.loginButton.active {
+  background-color: #f0fdfa;
+}
+
+.signupButton {
+  background-color: #22c55e;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.signupButton:hover {
+  background-color: #16a34a;
+}
+
+.signupButton.active {
+  background-color: #16a34a;
+}
+
+.accountButton {
+  background-color: #0f766e;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.accountButton:hover {
+  background-color: #0d9488;
+}
+
+.accountButton.active {
+  background-color: #0d9488;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 1rem;
+  }
+
+  .logoImage {
+    height: 32px;
+  }
+
+  .links {
+    display: none;
+  }
+
+  .authLinks {
+    gap: 0.5rem;
+  }
+
+  .loginButton,
+  .signupButton,
+  .accountButton {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+} 
