@@ -94,7 +94,7 @@ export default function AccountPage() {
                       {search.category} • {search.filters.join(', ')}
                     </p>
                     <p className={styles.timestamp}>
-                      Saved on {search.timestamp.toDate().toLocaleDateString()}
+                      Saved on {search.timestamp ? search.timestamp.toDate().toLocaleDateString() : search.savedAt}
                     </p>
                   </div>
                   <div className={styles.searchActions}>

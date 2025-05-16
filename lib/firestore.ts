@@ -9,6 +9,7 @@ export interface SavedSearch {
   category: string;
   filters: string[];
   timestamp?: Timestamp;
+  savedAt: string;
   results: Array<{
     id: string;
     title: string;
