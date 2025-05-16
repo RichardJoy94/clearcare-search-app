@@ -10,7 +10,7 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut
 } from 'firebase/auth';
-import { auth } from './firebaseClient';
+import { auth, isFirebaseInitialized } from './firebase';
 
 type AuthContextType = {
   user: User | null;
@@ -35,6 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isFirebaseInitialized()) {
+      console.error('Firebase is not initialized');
+      setLoading(false);
+      return;
+    }
+
+    if (!auth) {
+      console.error('Auth instance is not available');
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -44,6 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
+    if (!auth) {
+      throw new Error('Auth instance is not available');
+    }
+
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
@@ -54,6 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithEmail = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error('Auth instance is not available');
+    }
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
@@ -63,6 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUpWithEmail = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error('Auth instance is not available');
+    }
+
     try {
       await createUserWithEmailAndPassword(auth, email, password);
     } catch (error) {
@@ -72,6 +96,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!auth) {
+      throw new Error('Auth instance is not available');
+    }
+
     try {
       await firebaseSignOut(auth);
     } catch (error) {

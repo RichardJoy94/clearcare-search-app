@@ -22,6 +22,16 @@
   margin-bottom: 2rem;
 }
 
+.error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 500;
+}
+
 .section {
   background: white;
   padding: 2rem;
@@ -131,4 +141,22 @@
   min-height: calc(100vh - 80px);
   color: #0f766e;
   font-size: 1.125rem;
+  flex-direction: column;
+}
+
+.loading::after {
+  content: '';
+  width: 2rem;
+  height: 2rem;
+  margin-top: 1rem;
+  border: 2px solid #0f766e;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 } 

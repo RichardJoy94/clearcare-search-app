@@ -4,29 +4,38 @@ import { useRouter } from 'next/navigation';
 import styles from './account.module.css';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/AuthContext';
-import { SavedSearch, getSavedSearches, deleteSavedSearch } from '@/lib/firestore';
+import { SavedSearch, getSavedSearches, deleteSavedSearch } from '../../lib/firestore';
 
 export default function AccountPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [loadingSearches, setLoadingSearches] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
+      console.log('No user found, redirecting to login');
       router.push('/login');
     }
   }, [loading, user, router]);
 
   useEffect(() => {
     const loadSavedSearches = async () => {
-      if (!user) return;
+      if (!user) {
+        console.log('No user available to load searches');
+        return;
+      }
 
+      console.log('Loading saved searches for user:', user.uid);
       try {
         const searches = await getSavedSearches(user.uid);
+        console.log('Loaded saved searches:', searches);
         setSavedSearches(searches);
+        setError(null);
       } catch (error) {
         console.error('Error loading saved searches:', error);
+        setError('Failed to load saved searches. Please try again later.');
       } finally {
         setLoadingSearches(false);
       }
@@ -34,21 +43,31 @@ export default function AccountPage() {
 
     if (user) {
       loadSavedSearches();
+    } else {
+      setLoadingSearches(false);
     }
   }, [user]);
 
   const handleDeleteSearch = async (searchId: string) => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user available to delete search');
+      return;
+    }
 
+    console.log('Deleting search:', searchId);
     try {
       await deleteSavedSearch(user.uid, searchId);
       setSavedSearches(prev => prev.filter(search => search.id !== searchId));
+      setError(null);
+      console.log('Search deleted successfully');
     } catch (error) {
       console.error('Error deleting search:', error);
+      setError('Failed to delete search. Please try again later.');
     }
   };
 
   const handleViewSearch = (search: SavedSearch) => {
+    console.log('Viewing search:', search);
     const queryParams = new URLSearchParams({
       term: search.term,
       category: search.category,
@@ -58,13 +77,28 @@ export default function AccountPage() {
   };
 
   if (loading || loadingSearches) {
-    return <div className={styles.loading}>Loading...</div>;
+    console.log('Loading state:', { authLoading: loading, searchesLoading: loadingSearches });
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            Loading...
+          </motion.div>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
+    console.log('No user, rendering null');
     return null;
   }
 
+  console.log('Rendering account page with searches:', savedSearches);
   return (
     <div className={styles.container}>
       <motion.div 
@@ -77,6 +111,12 @@ export default function AccountPage() {
         <div className={styles.welcomeMessage}>
           Welcome, {user.email}!
         </div>
+        
+        {error && (
+          <div className={styles.error}>
+            {error}
+          </div>
+        )}
         
         <section className={styles.section}>
           <h2>Saved Searches</h2>

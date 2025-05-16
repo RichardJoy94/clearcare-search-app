@@ -8,8 +8,10 @@ export interface SavedSearch {
   term: string;
   category: string;
   filters: string[];
-  timestamp?: Timestamp;
+  timestamp: Timestamp;
   savedAt: string;
+  userId: string;
+  createdBy: string;
   results: Array<{
     id: string;
     title: string;
@@ -86,7 +88,6 @@ export async function saveSearch(userId: string, searchData: Omit<SavedSearch, '
 
   try {
     console.log('Creating reference to user searches collection...');
-    // Create the full path to ensure proper nesting
     const userDoc = doc(db as Firestore, 'users', userId);
     const userSearchesRef = collection(userDoc, 'savedSearches');
     
@@ -96,15 +97,16 @@ export async function saveSearch(userId: string, searchData: Omit<SavedSearch, '
       category: searchData.category || 'All',
       filters: Array.isArray(searchData.filters) ? searchData.filters.filter(Boolean) : [],
       results: cleanedResults,
+      timestamp: Timestamp.now(),
       savedAt: new Date().toISOString(),
       userId: userId,
-      createdBy: auth.currentUser.uid // Safe to use since we checked above
+      createdBy: auth.currentUser.uid
     };
 
     // Log the cleaned data and validation check
     console.log('Data to be saved:', JSON.stringify(dataToSave, null, 2));
     console.log('Validation check:', {
-      hasRequiredFields: ['term', 'category', 'results', 'savedAt', 'userId', 'createdBy'].every(field => field in dataToSave),
+      hasRequiredFields: ['term', 'category', 'results', 'timestamp', 'savedAt', 'userId', 'createdBy'].every(field => field in dataToSave),
       userIdMatches: dataToSave.userId === auth.currentUser.uid,
       createdByMatches: dataToSave.createdBy === auth.currentUser.uid
     });
@@ -136,14 +138,18 @@ export async function getSavedSearches(userId: string): Promise<SavedSearch[]> {
   }
 
   try {
+    console.log('Fetching saved searches for user:', userId);
     const userSearchesRef = collection(db as Firestore, 'users', userId, 'savedSearches');
     const q = query(userSearchesRef, orderBy('timestamp', 'desc'));
     const querySnapshot = await getDocs(q);
     
-    return querySnapshot.docs.map(doc => ({
+    const searches = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as SavedSearch[];
+
+    console.log('Retrieved saved searches:', searches.length);
+    return searches;
   } catch (error) {
     console.error('Error getting saved searches:', error);
     throw error;
