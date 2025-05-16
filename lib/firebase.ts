@@ -13,33 +13,19 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase only if we're in the browser
-const getFirebaseApp = (): FirebaseApp => {
-  if (typeof window === 'undefined') {
-    throw new Error('Firebase can only be initialized in the browser');
-  }
-
-  if (!getApps().length) {
-    return initializeApp(firebaseConfig);
-  }
-
-  return getApps()[0];
-};
-
-// Initialize services
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let db: Firestore | undefined;
 
-try {
-  if (typeof window !== 'undefined') {
-    app = getFirebaseApp();
+// Initialize Firebase only if we're in the browser and it hasn't been initialized
+if (typeof window !== 'undefined' && !getApps().length) {
+  try {
+    app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
+  } catch (error) {
+    console.error('Error initializing Firebase:', error);
   }
-} catch (error) {
-  console.error('Error initializing Firebase:', error);
-  throw error;
 }
 
 // Initialize analytics only in the browser and if supported

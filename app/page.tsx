@@ -6,7 +6,7 @@ import styles from './page.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analytics } from '@/lib/analytics';
 import { useAuth } from '@/lib/AuthContext';
-import { db } from '@/lib/firebaseClient';
+import { db } from '@/lib/firebase';
 import { doc, setDoc, deleteDoc, collection } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { saveSearch } from '@/lib/firestore';

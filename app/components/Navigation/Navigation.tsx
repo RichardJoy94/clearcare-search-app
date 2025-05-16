@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import styles from './Navigation.module.css';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/AuthContext';
-import { auth } from '@/lib/firebaseClient';
+import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 
 export default function Navigation() {
