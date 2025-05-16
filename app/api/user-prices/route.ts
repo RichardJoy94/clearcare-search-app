@@ -4,8 +4,9 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export async function POST(request: Request) {
   try {
-    // Log the database instance
-    console.log('Firestore instance:', !!db);
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
 
     const data = await request.json();
     console.log('Received data:', data);
@@ -23,7 +24,6 @@ export async function POST(request: Request) {
       .map(([, label]) => label);
 
     if (missingFields.length > 0) {
-      console.log('Missing fields:', missingFields);
       return NextResponse.json(
         { 
           error: `Missing required fields: ${missingFields.join(', ')}`,
@@ -36,7 +36,6 @@ export async function POST(request: Request) {
     // Validate price is a positive number
     const price = Number(data.pricePaid);
     if (isNaN(price) || price <= 0) {
-      console.log('Invalid price:', price);
       return NextResponse.json(
         { error: 'Price must be a positive number' },
         { status: 400 }
@@ -48,51 +47,27 @@ export async function POST(request: Request) {
       ...data,
       pricePaid: price,
       submittedAt: serverTimestamp(),
-      // Add metadata
       metadata: {
         submissionVersion: '1.0',
         submittedFromPage: 'price-insight',
-        submittedAt: new Date().toISOString() // Backup timestamp
+        submittedAt: new Date().toISOString()
       }
     };
 
-    console.log('Attempting to save submission:', priceSubmission);
+    // Add the document
+    const userPricesRef = collection(db, 'user-prices');
+    const docRef = await addDoc(userPricesRef, priceSubmission);
+    
+    return NextResponse.json({ 
+      success: true,
+      submissionId: docRef.id
+    });
 
-    try {
-      // Verify collection reference
-      const userPricesRef = collection(db, 'user-prices');
-      console.log('Collection reference created');
-
-      // Add the document
-      const docRef = await addDoc(userPricesRef, priceSubmission);
-      console.log('Document written with ID:', docRef.id);
-      
-      return NextResponse.json({ 
-        success: true,
-        submissionId: docRef.id
-      });
-    } catch (firestoreError: any) {
-      // Detailed Firestore error logging
-      console.error('Firestore error details:', {
-        code: firestoreError.code,
-        message: firestoreError.message,
-        stack: firestoreError.stack
-      });
-
-      // Return a more specific error message
-      return NextResponse.json(
-        { 
-          error: 'Database error while saving submission',
-          details: firestoreError.message
-        },
-        { status: 500 }
-      );
-    }
   } catch (error: any) {
-    // General error logging
-    console.error('General error in price submission:', {
+    console.error('Error in price submission:', {
       message: error.message,
-      stack: error.stack
+      stack: error.stack,
+      code: error.code
     });
 
     return NextResponse.json(

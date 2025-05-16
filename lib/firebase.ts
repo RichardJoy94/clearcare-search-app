@@ -13,32 +13,34 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-let app: FirebaseApp | undefined;
-let auth: Auth | undefined;
-let db: Firestore | undefined;
+// Initialize Firebase for both client and server environments
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
 
-// Initialize Firebase only if we're in the browser and it hasn't been initialized
-if (typeof window !== 'undefined' && !getApps().length) {
+// Initialize Firebase if it hasn't been initialized yet
+if (!getApps().length) {
   try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
   } catch (error) {
     console.error('Error initializing Firebase:', error);
+    throw error; // Re-throw to prevent undefined services
   }
+} else {
+  app = getApps()[0];
+  auth = getAuth(app);
+  db = getFirestore(app);
 }
 
-// Initialize analytics only in the browser and if supported
-const analytics = typeof window !== 'undefined' && app
+// Initialize analytics only in the browser
+const analytics = typeof window !== 'undefined'
   ? isSupported().then(() => getAnalytics(app))
   : null;
 
 // Export a function to check if Firebase is initialized
 const isFirebaseInitialized = () => {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-  
   try {
     return !!app && !!auth && !!db;
   } catch (error) {
