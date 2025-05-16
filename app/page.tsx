@@ -11,6 +11,9 @@ import { doc, setDoc, deleteDoc, collection } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { saveSearch } from '@/lib/firestore';
 import PricingInsight from './components/PricingInsight/PricingInsight';
+import { useSearchLimit } from '@/contexts/SearchLimitContext';
+import { SearchGate } from '@/components/SearchGate';
+import ServiceTabs from './components/ServiceTabs';
 
 const ShareIcon = () => (
   <svg
@@ -59,6 +62,7 @@ export default function HomePage() {
   const [savedResults, setSavedResults] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const router = useRouter();
+  const { incrementSearchCount, isLimitReached, isDismissed } = useSearchLimit();
 
   const categories = ['All', 'Vaccinations', 'Imaging', 'Lab Tests', 'Primary Care'];
   const distanceOptions = [5, 10, 25, 50, 100];
@@ -79,8 +83,20 @@ export default function HomePage() {
   }, []);
 
   const handleSearch = async (query: string) => {
+    // If limit is reached and gate not dismissed, don't proceed for non-logged-in users
+    if (!user && isLimitReached && !isDismissed) {
+      console.log('Search limit reached:', { searchCount: isLimitReached, isDismissed });
+      return;
+    }
+
     setLoading(true);
     try {
+      // Increment search count for non-logged-in users BEFORE the search
+      if (!user) {
+        incrementSearchCount();
+        console.log('Incremented search count for non-logged-in user');
+      }
+
       const response = await fetch('/api/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -178,21 +194,70 @@ export default function HomePage() {
     }
 
     try {
-      await saveSearch(user.uid, {
+      // Validate required data
+      if (!lastQuery) {
+        alert('No search query to save');
+        return;
+      }
+
+      if (!results || results.length === 0) {
+        alert('No search results to save');
+        return;
+      }
+
+      // Log the state of results before mapping
+      console.log('Current results state:', results);
+
+      // Validate that results have all required fields
+      const validResults = results.every(result => 
+        result.id && 
+        result.title && 
+        result.category && 
+        typeof result.price_min === 'number' && 
+        typeof result.price_max === 'number'
+      );
+
+      if (!validResults) {
+        console.error('Invalid results data:', results);
+        alert('Invalid search results data');
+        return;
+      }
+
+      const searchData = {
         term: lastQuery,
         category: activeCategory,
-        filters: [sortOrder],
-        results: results
-      });
+        filters: [sortOrder].filter(Boolean), // Remove empty filters
+        results: results.map(result => ({
+          id: result.id,
+          title: result.title,
+          category: result.category,
+          description: result.description || '',
+          price_min: Number(result.price_min),
+          price_max: Number(result.price_max),
+          location: result.location,
+          distance: typeof result.distance === 'number' ? result.distance : undefined
+        }))
+      };
+
+      console.log('Attempting to save search with data:', JSON.stringify(searchData, null, 2));
+      const savedId = await saveSearch(user.uid, searchData);
+      console.log('Search saved successfully with ID:', savedId);
       
-      // Show success message
-      analytics.trackEvent('search_saved', {
-        term: lastQuery,
-        category: activeCategory,
-        filters: [sortOrder]
-      });
+      // Show success message to user
+      alert('Search saved successfully!');
     } catch (error) {
-      console.error('Error saving search:', error);
+      // Enhanced error logging
+      console.error('Failed to save search:', {
+        error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorStack: error instanceof Error ? error.stack : undefined,
+        searchData: lastQuery,
+        category: activeCategory,
+        resultsLength: results.length,
+        userId: user.uid,
+        results: results.map(r => ({ id: r.id, hasTitle: !!r.title, hasCategory: !!r.category }))
+      });
+      alert('Failed to save search. Please try again');
     }
   };
 
@@ -205,7 +270,13 @@ export default function HomePage() {
           <input
             type="search"
             placeholder="Search healthcare services..."
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e) => {
+              const query = e.target.value;
+              // Only proceed with search if user is logged in or hasn't reached limit
+              if (user || !isLimitReached || isDismissed) {
+                handleSearch(query);
+              }
+            }}
             className={styles.searchInput}
           />
           <div className={styles.locationFilters}>
@@ -242,6 +313,8 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      <SearchGate />
 
       <div className={styles.filters}>
         <div className={styles.categories}>
@@ -353,113 +426,106 @@ export default function HomePage() {
                     </motion.button>
                   </div>
                 </div>
-                <Tabs
-                  tabs={[
-                    {
-                      label: 'Overview',
-                      content: (
-                        <div className={styles.resultContent}>
-                          <p>
-                            <strong>Category:</strong> {result.category}
-                          </p>
-                          <p>
-                            <strong>Description:</strong>{' '}
-                            <span
-                              dangerouslySetInnerHTML={{
-                                __html:
-                                  result._highlight?.description?.[0] ||
-                                  result.description,
-                              }}
-                            />
-                          </p>
-                          <p className={styles.price}>
-                            <strong>Price Range:</strong> ${result.price_min.toLocaleString()} - $
-                            {result.price_max.toLocaleString()}
-                          </p>
+                <ServiceTabs
+                  serviceId={result.id}
+                  overview={
+                    <div className={styles.resultContent}>
+                      <p>
+                        <strong>Category:</strong> {result.category}
+                      </p>
+                      <p>
+                        <strong>Description:</strong>{' '}
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html:
+                              result._highlight?.description?.[0] ||
+                              result.description,
+                          }}
+                        />
+                      </p>
+                      <div className={styles.priceRanges}>
+                        <div className={styles.priceRange}>
+                          <strong>Cash Price Range:</strong>
+                          <span className={styles.priceValue}>
+                            ${Math.floor(result.price_min * 1.2).toLocaleString()} - $
+                            {Math.floor(result.price_max * 1.2).toLocaleString()}
+                          </span>
+                          <span className={styles.priceBadge}>No Insurance</span>
+                        </div>
+                        <div className={styles.priceRange}>
+                          <strong>Insured Range:</strong>
+                          <span className={styles.priceValue}>
+                            ${Math.floor(result.price_min * 0.3).toLocaleString()} - $
+                            {Math.floor(result.price_max * 0.3).toLocaleString()}
+                          </span>
+                          <span className={styles.priceBadge}>With Insurance</span>
+                        </div>
+                      </div>
+                      {result.distance && (
+                        <p className={styles.distance}>
+                          <strong>Distance:</strong> {result.distance.toFixed(1)} miles away
+                        </p>
+                      )}
+                      <PricingInsight
+                        serviceId={result.id}
+                        serviceName={result.title}
+                        averageCost={Math.floor((result.price_min + result.price_max) / 2)}
+                        nationalRange={{
+                          min: Math.floor(result.price_min * 0.8),
+                          max: Math.floor(result.price_max * 1.2)
+                        }}
+                        trend={result.price_min > 1000 ? 'up' : result.price_min > 500 ? 'stable' : 'down'}
+                      />
+                    </div>
+                  }
+                  locations={
+                    <div className={styles.resultContent}>
+                      <div className={styles.locationInfo}>
+                        <p>
+                          <strong>Primary Location:</strong>{' '}
+                          <span>{result.location || 'Main Medical Center'}</span>
                           {result.distance && (
-                            <p className={styles.distance}>
-                              <strong>Distance:</strong> {result.distance.toFixed(1)} miles away
-                            </p>
+                            <span className={styles.distance}>
+                              {result.distance.toFixed(1)} miles away
+                            </span>
                           )}
-                          <PricingInsight
-                            serviceId={result.id}
-                            averageCost={Math.floor((result.price_min + result.price_max) / 2)}
-                            nationalRange={{
-                              min: Math.floor(result.price_min * 0.8),
-                              max: Math.floor(result.price_max * 1.2)
-                            }}
-                            trend={result.price_min > 1000 ? 'up' : result.price_min > 500 ? 'stable' : 'down'}
-                          />
-                        </div>
-                      ),
-                    },
-                    {
-                      label: 'Location',
-                      content: (
-                        <div className={styles.resultContent}>
-                          <div className={styles.locationInfo}>
-                            <p>
-                              <strong>Primary Location:</strong>{' '}
-                              <span>{result.location || 'Main Medical Center'}</span>
-                              {result.distance && (
-                                <span className={styles.distance}>
-                                  {result.distance.toFixed(1)} miles away
-                                </span>
-                              )}
-                            </p>
-                            <p><strong>Other Locations:</strong></p>
-                            <ul className={styles.locationList}>
-                              <li>
-                                <span>Downtown Clinic</span>
-                                <div className={styles.locationActions}>
-                                  <span className={styles.locationMeta}>8AM-6PM</span>
-                                  <a
-                                    href="https://example.com/downtown-clinic"
-                                    className={styles.locationLink}
-                                    onClick={() => trackLocationClick('Downtown Clinic', result.id)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    Visit Website →
-                                  </a>
-                                </div>
-                              </li>
-                              <li>
-                                <span>West Side Medical</span>
-                                <div className={styles.locationActions}>
-                                  <span className={styles.locationMeta}>7AM-8PM</span>
-                                  <a
-                                    href="https://example.com/westside-medical"
-                                    className={styles.locationLink}
-                                    onClick={() => trackLocationClick('West Side Medical', result.id)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    Visit Website →
-                                  </a>
-                                </div>
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
-                      ),
-                    },
-                    {
-                      label: 'Details',
-                      content: (
-                        <div className={styles.resultContent}>
-                          <p><strong>Service ID:</strong> {result.id}</p>
-                          <p>
-                            <strong>Average Cost:</strong> $
-                            {((result.price_min + result.price_max) / 2).toLocaleString()}
-                          </p>
-                          <p><strong>Insurance Info:</strong> Contact provider for details</p>
-                          <p><strong>Preparation:</strong> No special preparation required</p>
-                          <p><strong>Duration:</strong> Approximately 30 minutes</p>
-                        </div>
-                      ),
-                    },
-                  ]}
+                        </p>
+                        <p><strong>Other Locations:</strong></p>
+                        <ul className={styles.locationList}>
+                          <li>
+                            <span>Downtown Clinic</span>
+                            <div className={styles.locationActions}>
+                              <span className={styles.locationMeta}>8AM-6PM</span>
+                              <a
+                                href="https://example.com/downtown-clinic"
+                                className={styles.locationLink}
+                                onClick={() => trackLocationClick('Downtown Clinic', result.id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Visit Website →
+                              </a>
+                            </div>
+                          </li>
+                          <li>
+                            <span>West Side Medical</span>
+                            <div className={styles.locationActions}>
+                              <span className={styles.locationMeta}>7AM-8PM</span>
+                              <a
+                                href="https://example.com/westside-medical"
+                                className={styles.locationLink}
+                                onClick={() => trackLocationClick('West Side Medical', result.id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Visit Website →
+                              </a>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  }
                 />
               </li>
             ))}

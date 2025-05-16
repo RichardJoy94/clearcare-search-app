@@ -1,73 +1,150 @@
 .container {
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   padding: 2rem;
-  background-color: #f8fafc;
+  background-color: #f9fafb;
 }
 
-.formContainer {
+.formWrapper {
   background: white;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   width: 100%;
-  max-width: 480px;
+  max-width: 400px;
 }
 
-.formContainer h1 {
-  color: #0f766e;
+.formWrapper h1 {
+  text-align: center;
+  color: #111827;
   font-size: 1.875rem;
   font-weight: 600;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
   text-align: center;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
-.inputGroup {
+.formGroup {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.inputGroup label {
+.formGroup label {
+  color: #374151;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: #334155;
 }
 
-.inputGroup input {
-  padding: 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
+.input {
+  padding: 0.625rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
   font-size: 1rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.15s ease-in-out;
 }
 
-.inputGroup input:focus {
+.input:focus {
   outline: none;
-  border-color: #0f766e;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .submitButton {
-  background-color: #22c55e;
+  background-color: #3b82f6;
   color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 6px;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
   font-weight: 500;
-  font-size: 1rem;
+  transition: background-color 0.15s ease-in-out;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
-  margin-top: 1rem;
 }
 
 .submitButton:hover {
-  background-color: #16a34a;
+  background-color: #2563eb;
+}
+
+.submitButton:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+.divider {
+  margin: 1.5rem 0;
+  text-align: center;
+  position: relative;
+  color: #6b7280;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background-color: #e5e7eb;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.googleButton {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  color: #374151;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.googleButton:hover {
+  background-color: #f3f4f6;
+}
+
+.loginLink {
+  text-align: center;
+  margin-top: 1rem;
+  color: #6b7280;
+}
+
+.textButton {
+  color: #3b82f6;
+  background: none;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.textButton:hover {
+  text-decoration: underline;
 } 

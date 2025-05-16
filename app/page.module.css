@@ -177,8 +177,11 @@
 
 .resultTitle {
   margin: 0 0 1rem 0;
-  color: #2d3748;
-  font-size: 1.25rem;
+  color: #1a202c;
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .resultContent {
@@ -190,8 +193,7 @@
 }
 
 .price {
-  color: #2d3748;
-  font-weight: 500;
+  display: none;
 }
 
 .loading {
@@ -466,4 +468,57 @@
 .locationList li:hover {
   background-color: #EBF8FF;
   transform: translateX(2px);
+}
+
+.priceRanges {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.priceRange {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background-color: white;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+.priceRange strong {
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.priceValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.priceBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background-color: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 1rem;
+  align-self: flex-start;
+}
+
+@media (min-width: 640px) {
+  .priceRanges {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .priceRange {
+    flex: 1;
+  }
 } 

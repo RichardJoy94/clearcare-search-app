@@ -1,0 +1,102 @@
+.tabContainer {
+  margin-top: 1.5rem;
+}
+
+.tabList {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabList::-webkit-scrollbar {
+  display: none;
+}
+
+.tabButton {
+  position: relative;
+  padding: 0.75rem 1rem;
+  color: #6b7280;
+  border: none;
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.tabButton:hover {
+  color: #111827;
+}
+
+.tabButton.active {
+  color: #3b82f6;
+}
+
+.tabButton.premium {
+  color: #9ca3af;
+}
+
+.activeIndicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #3b82f6;
+}
+
+.lockIndicator {
+  font-size: 0.875rem;
+}
+
+.tabPanel {
+  padding: 1rem 0;
+}
+
+.premiumFeature {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.lockIcon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.premiumFeature h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.premiumFeature p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.upgradeButton {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.upgradeButton:hover {
+  background-color: #2563eb;
+} 

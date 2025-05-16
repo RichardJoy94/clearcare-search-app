@@ -1,9 +1,43 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Helper function to validate saved search data
+    function isValidSavedSearch() {
+      let data = request.resource.data;
+      let requiredFields = ['term', 'category', 'results', 'savedAt', 'userId', 'createdBy'];
+      let hasAllFields = requiredFields.hasAll(data.keys());
+      
+      return hasAllFields && 
+             data.userId == request.auth.uid &&
+             data.createdBy == request.auth.uid;
+    }
+
+    // User's saved results and searches
     match /users/{userId}/savedResults/{resultId} {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/savedSearches/{searchId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Crowdsourced prices - maintain existing permissions
+    match /user-prices/{priceId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
     }
   }
 } 

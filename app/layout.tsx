@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import Navigation from "./components/Navigation/Navigation";
 import { AuthProvider } from "@/lib/AuthContext";
+import { SearchLimitProvider } from "@/contexts/SearchLimitContext";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,8 +27,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <Navigation />
-          {children}
+          <SearchLimitProvider>
+            <Navigation />
+            {children}
+          </SearchLimitProvider>
         </AuthProvider>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}

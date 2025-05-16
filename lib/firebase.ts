@@ -1,6 +1,6 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -13,22 +13,53 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Check if all required Firebase configuration values are present
-const isFirebaseConfigured = Object.values(firebaseConfig).every(value => value !== undefined && value !== '');
+// Initialize Firebase only if we're in the browser
+const getFirebaseApp = (): FirebaseApp => {
+  if (typeof window === 'undefined') {
+    throw new Error('Firebase can only be initialized in the browser');
+  }
 
-// Only initialize Firebase if it hasn't been initialized and configuration is complete
-const app = isFirebaseConfigured && !getApps().length ? initializeApp(firebaseConfig) : null;
+  if (!getApps().length) {
+    return initializeApp(firebaseConfig);
+  }
 
-// Export auth and db only if Firebase is properly configured
-export const auth = app ? getAuth(app) : null;
-export const db = app ? getFirestore(app) : null;
+  return getApps()[0];
+};
+
+// Initialize services
+let app: FirebaseApp | undefined;
+let auth: Auth | undefined;
+let db: Firestore | undefined;
+
+try {
+  if (typeof window !== 'undefined') {
+    app = getFirebaseApp();
+    auth = getAuth(app);
+    db = getFirestore(app);
+  }
+} catch (error) {
+  console.error('Error initializing Firebase:', error);
+  throw error;
+}
 
 // Initialize analytics only in the browser and if supported
-export const analytics = typeof window !== 'undefined' && app
+const analytics = typeof window !== 'undefined' && app
   ? isSupported().then(() => getAnalytics(app))
   : null;
 
-// Export a function to check if Firebase is configured and initialized
-export const isFirebaseInitialized = () => {
-  return !!app && !!auth && !!db;
-}; 
+// Export a function to check if Firebase is initialized
+const isFirebaseInitialized = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  
+  try {
+    return !!app && !!auth && !!db;
+  } catch (error) {
+    console.error('Error checking Firebase initialization:', error);
+    return false;
+  }
+};
+
+// Export initialized services
+export { auth, db, analytics, isFirebaseInitialized }; 
