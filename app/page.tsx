@@ -236,7 +236,10 @@ export default function HomePage() {
           price_max: Number(result.price_max),
           location: result.location,
           distance: typeof result.distance === 'number' ? result.distance : undefined
-        }))
+        })),
+        savedAt: new Date().toISOString(),
+        userId: user.uid,
+        createdBy: user.uid
       };
 
       console.log('Attempting to save search with data:', JSON.stringify(searchData, null, 2));
