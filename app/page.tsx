@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { SearchResult } from './types';
+import { useState, useEffect, useCallback } from 'react';
+import { SearchResult, SearchSuggestion } from './types';
 import Tabs from './components/Tabs';
 import styles from './page.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +14,8 @@ import PricingInsight from './components/PricingInsight/PricingInsight';
 import { useSearchLimit } from '@/contexts/SearchLimitContext';
 import { SearchGate } from '@/components/SearchGate';
 import ServiceTabs from './components/ServiceTabs';
+import SearchSuggestions from '@/components/SearchSuggestions';
+import debounce from 'lodash.debounce';
 
 const ShareIcon = () => (
   <svg
@@ -63,6 +65,9 @@ export default function HomePage() {
   const { user } = useAuth();
   const router = useRouter();
   const { incrementSearchCount, isLimitReached, isDismissed } = useSearchLimit();
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
 
   const categories = ['All', 'Vaccinations', 'Imaging', 'Lab Tests', 'Primary Care'];
   const distanceOptions = [5, 10, 25, 50, 100];
@@ -81,6 +86,52 @@ export default function HomePage() {
       setActiveCategory(category);
     }
   }, []);
+
+  const fetchSuggestions = useCallback(
+    debounce(async (query: string) => {
+      if (query.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/suggestions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query }),
+        });
+
+        const data = await response.json();
+        setSuggestions(data.suggestions);
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        setSuggestions([]);
+      }
+    }, 300),
+    []
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    fetchSuggestions(value);
+    setShowSuggestions(true);
+  };
+
+  const handleSuggestionSelect = (suggestion: SearchSuggestion) => {
+    setSearchInput(suggestion.title);
+    setShowSuggestions(false);
+    handleSearch(suggestion.title);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setShowSuggestions(false);
+      handleSearch(searchInput);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+    }
+  };
 
   const handleSearch = async (query: string) => {
     // If limit is reached and gate not dismissed, don't proceed for non-logged-in users
@@ -270,18 +321,33 @@ export default function HomePage() {
       
       <div className={styles.searchContainer}>
         <div className={styles.searchRow}>
-          <input
-            type="search"
-            placeholder="Search healthcare services..."
-            onChange={(e) => {
-              const query = e.target.value;
-              // Only proceed with search if user is logged in or hasn't reached limit
-              if (user || !isLimitReached || isDismissed) {
-                handleSearch(query);
-              }
-            }}
-            className={styles.searchInput}
-          />
+          <div className={styles.searchInputWrapper}>
+            <input
+              type="search"
+              placeholder="Search healthcare services..."
+              value={searchInput}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setShowSuggestions(true)}
+              className={styles.searchInput}
+            />
+            <button
+              className={styles.searchButton}
+              onClick={() => {
+                setShowSuggestions(false);
+                handleSearch(searchInput);
+              }}
+              aria-label="Search"
+              type="button"
+            >
+              Search
+            </button>
+            <SearchSuggestions
+              suggestions={suggestions}
+              onSelect={handleSuggestionSelect}
+              visible={showSuggestions}
+            />
+          </div>
           <div className={styles.locationFilters}>
             <input
               type="text"

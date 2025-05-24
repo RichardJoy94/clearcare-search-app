@@ -41,4 +41,10 @@ export interface TabData {
 export interface LocationFilter {
   zipCode: string;
   maxDistance: number;
+}
+
+export interface SearchSuggestion {
+  id: string;
+  title: string;
+  category: string;
 } 

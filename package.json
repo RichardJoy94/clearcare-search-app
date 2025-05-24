@@ -25,7 +25,7 @@
     "react-firebase-hooks": "^5.1.1",
     "react-icons": "^5.5.0",
     "stripe": "^14.14.0",
-    "typesense": "1.7.1"
+    "typesense": "^1.7.1"
   },
   "devDependencies": {
     "@types/lodash": "4.14.202",
