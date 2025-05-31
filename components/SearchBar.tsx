@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 import typesenseClient from '../lib/typesenseClient';
 import Select from 'react-select';
 
@@ -23,6 +23,7 @@ const DEFAULT_INSURANCE_OPTION = {
 };
 
 type InsuranceOption = { label: string; options: any[] };
+type InsuranceValue = { value: string; label: string };
 
 type SearchBarProps = {
   onSearch: (params: any) => void;
@@ -31,11 +32,11 @@ type SearchBarProps = {
 export default function SearchBar({ onSearch }: SearchBarProps) {
   // State
   const [procedure, setProcedure] = useState('');
-  const [procedureSuggestions, setProcedureSuggestions] = useState([]);
+  const [procedureSuggestions, setProcedureSuggestions] = useState<string[]>([]);
   const [location, setLocation] = useState('');
-  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
   const [insuranceOptions, setInsuranceOptions] = useState<InsuranceOption[]>([]);
-  const [selectedInsurance, setSelectedInsurance] = useState(DEFAULT_INSURANCE_OPTION);
+  const [selectedInsurance, setSelectedInsurance] = useState<InsuranceValue>(DEFAULT_INSURANCE_OPTION);
   const [loadingInsurance, setLoadingInsurance] = useState(false);
 
   // Fetch insurance plans on mount
@@ -105,7 +106,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
   }, [location]);
 
   // Handle search button
-  const handleSearch = (e) => {
+  const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (onSearch) {
       onSearch({
@@ -181,7 +182,11 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
         <Select
           options={insuranceOptions}
           value={selectedInsurance}
-          onChange={setSelectedInsurance}
+          onChange={(newValue: InsuranceValue | null) => {
+            if (newValue) {
+              setSelectedInsurance(newValue);
+            }
+          }}
           isLoading={loadingInsurance}
           classNamePrefix="react-select"
           placeholder="Insurance Plan"
