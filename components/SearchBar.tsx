@@ -22,6 +22,8 @@ const DEFAULT_INSURANCE_OPTION = {
   label: "I don't know my plan",
 };
 
+type InsuranceOption = { label: string; options: any[] };
+
 type SearchBarProps = {
   onSearch: (params: any) => void;
 };
@@ -32,7 +34,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
   const [procedureSuggestions, setProcedureSuggestions] = useState([]);
   const [location, setLocation] = useState('');
   const [locationSuggestions, setLocationSuggestions] = useState([]);
-  const [insuranceOptions, setInsuranceOptions] = useState([]);
+  const [insuranceOptions, setInsuranceOptions] = useState<InsuranceOption[]>([]);
   const [selectedInsurance, setSelectedInsurance] = useState(DEFAULT_INSURANCE_OPTION);
   const [loadingInsurance, setLoadingInsurance] = useState(false);
 
