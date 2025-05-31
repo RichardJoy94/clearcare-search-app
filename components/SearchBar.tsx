@@ -4,7 +4,7 @@ import Select from 'react-select';
 
 // Helper for react-select grouped options
 const groupInsurancePlans = (plans: any[]) => {
-  const groups = {};
+  const groups: { [key: string]: any[] } = {};
   plans.forEach((plan) => {
     const group = plan.insurer_name || 'Other';
     if (!groups[group]) groups[group] = [];
