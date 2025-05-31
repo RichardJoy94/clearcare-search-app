@@ -50,7 +50,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
       })
       .then((res) => {
         if (mounted) {
-          const grouped = groupInsurancePlans(res.hits.map((h) => h.document));
+          const grouped = groupInsurancePlans((res.hits ?? []).map((h: any) => h.document));
           setInsuranceOptions([
             { label: '', options: [DEFAULT_INSURANCE_OPTION] },
             ...grouped,
