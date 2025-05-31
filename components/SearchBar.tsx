@@ -22,7 +22,11 @@ const DEFAULT_INSURANCE_OPTION = {
   label: "I don't know my plan",
 };
 
-export default function SearchBar({ onSearch }) {
+type SearchBarProps = {
+  onSearch: (params: any) => void;
+};
+
+export default function SearchBar({ onSearch }: SearchBarProps) {
   // State
   const [procedure, setProcedure] = useState('');
   const [procedureSuggestions, setProcedureSuggestions] = useState([]);
