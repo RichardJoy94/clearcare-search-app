@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import styles from './PricingInsight.module.css';
 import { motion } from 'framer-motion';
 import { PriceSubmissionModal } from '@/components/PriceSubmissionModal';
+import { Fragment } from 'react';
 
 interface PricingInsightProps {
   serviceId: string;
@@ -42,22 +43,71 @@ const getTrendText = (trend: string) => {
   }
 };
 
+// Tooltip component
+const InfoTooltip = ({ text }: { text: string }) => (
+  <span className="relative group inline-block align-middle ml-1">
+    <span
+      tabIndex={0}
+      className="cursor-pointer text-blue-400 focus:outline-none"
+      aria-label="Info"
+    >
+      ℹ️
+    </span>
+    <span className="absolute left-1/2 z-20 w-48 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none">
+      {text}
+    </span>
+  </span>
+);
+
+// Lock icon with tooltip
+const LockTooltip = ({ text }: { text: string }) => (
+  <span className="relative group inline-block align-middle ml-1">
+    <span
+      tabIndex={0}
+      className="cursor-pointer text-gray-400 focus:outline-none"
+      aria-label="Locked"
+    >
+      <svg className="inline w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="8" rx="2"/><path d="M12 16v-4"/><path d="M8 10V8a4 4 0 1 1 8 0v2"/></svg>
+    </span>
+    <span className="absolute left-1/2 z-20 w-56 -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none">
+      {text}
+    </span>
+  </span>
+);
+
+// Placeholder for sparkline
+const MiniSparkline = () => (
+  <span className="inline-block align-middle ml-2">
+    {/* Placeholder: Replace with <Sparklines> if react-sparklines is installed */}
+    <svg width="60" height="18"><polyline points="2,16 10,10 18,12 26,6 34,8 42,4 50,10 58,2" fill="none" stroke="#3b82f6" strokeWidth="2"/></svg>
+  </span>
+);
+
 const BasicInsights = ({ averageCost, nationalRange, trend, onSharePrice }: Omit<PricingInsightProps, 'serviceId' | 'serviceName'> & { onSharePrice: () => void }) => (
   <div className={styles.content}>
     <div className={styles.insightItem}>
-      <span className={styles.label}>New York Average:</span>
+      <span className={styles.label}>
+        New York Average:
+        <InfoTooltip text="The average price for this service in New York." />
+      </span>
       <span className={styles.value}>${averageCost.toLocaleString()}</span>
     </div>
     <div className={styles.insightItem}>
-      <span className={styles.label}>National Average:</span>
+      <span className={styles.label}>
+        National Average:
+        <InfoTooltip text="The average price for this service across the US." />
+      </span>
       <span className={styles.value}>
         ${Math.floor((nationalRange.min + nationalRange.max) / 2).toLocaleString()}
       </span>
     </div>
     <div className={styles.insightItem}>
-      <span className={styles.label}>12-Month Trend:</span>
+      <span className={styles.label}>
+        12-Month Trend:
+        <InfoTooltip text="How prices have changed over the past year." />
+      </span>
       <span className={styles.value}>
-        {getTrendIcon(trend)} {getTrendText(trend)}
+        {getTrendIcon(trend)} {getTrendText(trend)} <MiniSparkline />
       </span>
     </div>
     <button onClick={onSharePrice} className={styles.shareButton}>
@@ -69,32 +119,40 @@ const BasicInsights = ({ averageCost, nationalRange, trend, onSharePrice }: Omit
 const PremiumInsights = ({ averageCost, nationalRange, trend, onSharePrice }: Omit<PricingInsightProps, 'serviceId' | 'serviceName'> & { onSharePrice: () => void }) => (
   <div className={styles.content}>
     <div className={styles.insightItem}>
-      <span className={styles.label}>New York Average:</span>
+      <span className={styles.label}>
+        New York Average:
+        <InfoTooltip text="The average price for this service in New York." />
+      </span>
       <span className={styles.value}>${averageCost.toLocaleString()}</span>
     </div>
     <div className={styles.insightItem}>
-      <span className={styles.label}>National Range:</span>
+      <span className={styles.label}>
+        National Range:
+        <InfoTooltip text="The price range for this service across the US." />
+      </span>
       <span className={styles.value}>
         ${nationalRange.min.toLocaleString()} - ${nationalRange.max.toLocaleString()}
       </span>
     </div>
     <div className={styles.insightItem}>
-      <span className={styles.label}>12-Month Trend:</span>
+      <span className={styles.label}>
+        12-Month Trend:
+        <InfoTooltip text="How prices have changed over the past year." />
+      </span>
       <span className={styles.value}>
-        {getTrendIcon(trend)} {getTrendText(trend)}
+        {getTrendIcon(trend)} {getTrendText(trend)} <MiniSparkline />
       </span>
     </div>
-    <div className={styles.insightItem}>
-      <span className={styles.label}>Insurance Coverage:</span>
-      <span className={styles.premiumLocked}>
-        <span className={styles.lockIcon}>🔒</span> Premium Feature
-      </span>
+    {/* Locked Premium Rows */}
+    <div className="flex items-center gap-2 bg-gray-100 text-gray-400 rounded px-3 py-2 mt-2 opacity-60 blur-[1px] pointer-events-none select-none">
+      <span className="font-medium">Insurance Coverage:</span>
+      <span>Premium Feature</span>
+      <span className="pointer-events-auto blur-0 ml-2"><LockTooltip text="Upgrade to unlock historical insights" /></span>
     </div>
-    <div className={styles.insightItem}>
-      <span className={styles.label}>Historical Pricing:</span>
-      <span className={styles.premiumLocked}>
-        <span className={styles.lockIcon}>🔒</span> Premium Feature
-      </span>
+    <div className="flex items-center gap-2 bg-gray-100 text-gray-400 rounded px-3 py-2 mt-2 opacity-60 blur-[1px] pointer-events-none select-none">
+      <span className="font-medium">Historical Pricing:</span>
+      <span>Premium Feature</span>
+      <span className="pointer-events-auto blur-0 ml-2"><LockTooltip text="Upgrade to unlock historical insights" /></span>
     </div>
     <button onClick={onSharePrice} className={styles.shareButton}>
       Paid a different price? Share anonymously

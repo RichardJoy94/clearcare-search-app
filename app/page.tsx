@@ -16,6 +16,7 @@ import { SearchGate } from '@/components/SearchGate';
 import ServiceTabs from './components/ServiceTabs';
 import SearchSuggestions from '@/components/SearchSuggestions';
 import debounce from 'lodash.debounce';
+import SearchBar from '../components/SearchBar';
 
 const ShareIcon = () => (
   <svg
@@ -68,6 +69,7 @@ export default function HomePage() {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchInput, setSearchInput] = useState('');
+  const [selectedInsuranceLabel, setSelectedInsuranceLabel] = useState<string>("");
 
   const categories = ['All', 'Vaccinations', 'Imaging', 'Lab Tests', 'Primary Care'];
   const distanceOptions = [5, 10, 25, 50, 100];
@@ -315,74 +317,19 @@ export default function HomePage() {
     }
   };
 
+  // Add a handler for the new SearchBar
+  const handleStructuredSearch = ({ procedure, location, insurance, selectedInsuranceLabel: planLabel }: { procedure: string; location: string; insurance: string; selectedInsuranceLabel: string }) => {
+    setSelectedInsuranceLabel(planLabel);
+    handleSearch(procedure);
+  };
+
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>Healthcare Price Transparency</h1>
-      
-      <div className={styles.searchContainer}>
-        <div className={styles.searchRow}>
-          <div className={styles.searchInputWrapper}>
-            <input
-              type="search"
-              placeholder="Search healthcare services..."
-              value={searchInput}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onFocus={() => setShowSuggestions(true)}
-              className={styles.searchInput}
-            />
-            <button
-              className={styles.searchButton}
-              onClick={() => {
-                setShowSuggestions(false);
-                handleSearch(searchInput);
-              }}
-              aria-label="Search"
-              type="button"
-            >
-              Search
-            </button>
-            <SearchSuggestions
-              suggestions={suggestions}
-              onSelect={handleSuggestionSelect}
-              visible={showSuggestions}
-            />
-          </div>
-          <div className={styles.locationFilters}>
-            <input
-              type="text"
-              placeholder="Enter ZIP code"
-              value={userZipCode}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-                setUserZipCode(value);
-                if (value.length === 5 && lastQuery) {
-                  handleSearch(lastQuery);
-                }
-              }}
-              className={styles.zipInput}
-              maxLength={5}
-            />
-            <select
-              value={maxDistance}
-              onChange={(e) => {
-                setMaxDistance(Number(e.target.value));
-                if (lastQuery) {
-                  handleSearch(lastQuery);
-                }
-              }}
-              className={styles.distanceSelect}
-            >
-              {distanceOptions.map((distance) => (
-                <option key={distance} value={distance}>
-                  Within {distance} miles
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+      <div className="mb-8">
+        <SearchBar onSearch={handleStructuredSearch} />
       </div>
-
+      
       <SearchGate />
 
       <div className={styles.filters}>
@@ -527,7 +474,12 @@ export default function HomePage() {
                             ${Math.floor(result.price_min * 0.3).toLocaleString()} - $
                             {Math.floor(result.price_max * 0.3).toLocaleString()}
                           </span>
-                          <span className={styles.priceBadge}>With Insurance</span>
+                          <span className={styles.priceBadge}>
+                            With Insurance
+                            {selectedInsuranceLabel && selectedInsuranceLabel !== "I don't know my plan" && (
+                              <span className="text-sm text-gray-500 italic ml-1">{selectedInsuranceLabel}</span>
+                            )}
+                          </span>
                         </div>
                       </div>
                       {result.distance && (
