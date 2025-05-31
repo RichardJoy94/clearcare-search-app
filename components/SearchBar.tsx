@@ -3,7 +3,7 @@ import typesenseClient from '../lib/typesenseClient';
 import Select from 'react-select';
 
 // Helper for react-select grouped options
-const groupInsurancePlans = (plans) => {
+const groupInsurancePlans = (plans: any[]) => {
   const groups = {};
   plans.forEach((plan) => {
     const group = plan.insurer_name || 'Other';
