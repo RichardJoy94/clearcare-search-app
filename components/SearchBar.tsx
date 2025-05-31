@@ -76,7 +76,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
           query_by: 'name',
           per_page: 5,
         })
-        .then((res) => setProcedureSuggestions(res.hits.map((h) => h.document.name)))
+        .then((res) => setProcedureSuggestions((res.hits ?? []).map((h: any) => h.document.name)))
         .catch(() => setProcedureSuggestions([]));
     }, 200);
     return () => clearTimeout(timeout);
@@ -96,7 +96,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
         })
         .then((res) =>
           setLocationSuggestions(
-            res.hits.map((h) => `${h.document.city} (${h.document.zip})`)
+            (res.hits ?? []).map((h: any) => `${h.document.city} (${h.document.zip})`)
           )
         )
         .catch(() => setLocationSuggestions([]));
