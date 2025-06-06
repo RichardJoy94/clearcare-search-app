@@ -1,36 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ClearCareHQ - Search App
 
-## Getting Started
+[![Vercel](https://vercelbadge.vercel.app/api/clearcarehq/clearcare-search-app)](https://app.clearcarehq.com/)
 
-First, run the development server:
+**ClearCareHQ Search App** is a modern, responsive web application for searching healthcare pricing transparency data.
+It enables healthcare consumers, providers, and payers to explore and compare healthcare service costs through an intuitive search experience.
+
+👉 Live app: [https://app.clearcarehq.com](https://app.clearcarehq.com)
+
+---
+
+## ✨ Features
+
+* 🔍 **Full-text search** for healthcare pricing data
+* 🏷️ **Faceted filtering** (provider, payer, service type, location, etc.)
+* 💾 **Saved searches** and **search history**
+* 💡 **Auto-suggestions** and intelligent search hints
+* 🖥️ **Responsive design** — works great on desktop & mobile
+* ⚡ **Fast and scalable** — powered by Next.js and optimized queries
+* 🌐 **Deployed via Vercel** for zero-downtime CI/CD
+
+---
+
+## 🏗 Tech Stack
+
+* **Frontend Framework**: [Next.js](https://nextjs.org/)
+* **Language**: [TypeScript](https://www.typescriptlang.org/)
+* **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+* **State Management**: React Context API / Hooks
+* **Search Backend**: (Specify if using Algolia, Firestore, or other search index — Firestore is implied via `firestore.rules`)
+* **Deployment**: [Vercel](https://vercel.com/)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* [Node.js](https://nodejs.org/) **v18+**
+* [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/) or [yarn](https://yarnpkg.com/) — choose one
+
+### Installation
 
 ```bash
+# Clone the repo
+git clone https://github.com/your-org/clearcare-search-app.git
+cd clearcare-search-app
+
+# Install dependencies
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### Running locally
+
+```bash
+# Start the local dev server
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will be available at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠 Project Structure
 
-## Learn More
+```plaintext
+__tests__/          → Unit and integration tests
+app/                → App configuration / higher-level logic
+components/         → Reusable React components (SearchBar, ResultList, etc.)
+contexts/           → React Contexts for state management
+hooks/              → Custom React Hooks
+lib/                → Utility functions, API clients, helpers
+pages/              → Next.js pages (main app routes)
+public/             → Static assets (images, favicon, etc.)
+styles/             → Tailwind CSS configuration
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ⚙️ Configuration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The app can be configured using environment variables.
+Create a `.env.local` file for local development.
 
-## Deploy on Vercel
+Example:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🧪 Testing
+
+```bash
+npm run test
+# or
+yarn test
+# or
+pnpm test
+```
+
+Tests are located in the `__tests__/` directory.
+
+---
+
+## 🚀 Deployment
+
+The app is deployed via [Vercel](https://vercel.com/).
+
+Every push to `main` triggers a deployment to production:
+
+👉 **Production:** [https://app.clearcarehq.com](https://app.clearcarehq.com)
+
+---
+
+## 📝 Contributing
+
+We welcome contributions from internal team members!
+
+* Fork this repo
+* Create a new branch
+* Submit a Pull Request with clear description
+
+Please follow existing code style (TypeScript + Tailwind CSS conventions).
+
+---
+
+## 📄 License
+
+This project is proprietary to **ClearCareHQ**. All rights reserved.
+
+---
+
+## 📞 Contact
+
+* Project Lead: Richard Joy
+* Internal Slack: #clearcarehq-search
+* Main site: [https://clearcarehq.com](https://clearcarehq.com)
+
