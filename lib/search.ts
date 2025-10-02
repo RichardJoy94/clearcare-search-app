@@ -12,12 +12,12 @@ const typesenseClient = new Typesense.Client({
   connectionTimeoutSeconds: 2,
 });
 
-export const servicesCollection = typesenseClient.collections('services');
+export const servicesCollection = typesenseClient.collections('services_main');
 
 export async function searchHealthcareServices(query: string, options: any = {}) {
   return servicesCollection.documents().search({
     q: query,
-    query_by: 'title,category,description',
+    query_by: 'display_name,category,description',
     ...options,
   });
 }
@@ -25,7 +25,7 @@ export async function searchHealthcareServices(query: string, options: any = {})
 export async function suggestHealthcareServices(query: string, options: any = {}) {
   return servicesCollection.documents().search({
     q: query,
-    query_by: 'title,category',
+    query_by: 'display_name,category',
     prefix: true,
     per_page: 5,
     ...options,
@@ -34,11 +34,11 @@ export async function suggestHealthcareServices(query: string, options: any = {}
 
 export interface SearchResult {
   id: string;
-  title: string;
+  display_name: string;
   category: string;
   description: string;
-  price_min: number;
-  price_max: number;
+  min_price: number;
+  max_price: number;
   location: {
     zipCode: string;
     distance?: number;

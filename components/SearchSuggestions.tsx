@@ -3,7 +3,7 @@ import styles from './SearchSuggestions.module.css';
 
 interface SearchSuggestion {
   id: string;
-  title: string;
+  display_name: string;
   category: string;
 }
 
@@ -30,7 +30,7 @@ export default function SearchSuggestions({ suggestions, onSelect, visible }: Se
           onClick={() => onSelect(suggestion)}
           whileHover={{ backgroundColor: '#f7fafc' }}
         >
-          <div className={styles.suggestionTitle}>{suggestion.title}</div>
+          <div className={styles.suggestionTitle}>{suggestion.display_name}</div>
           <div className={styles.suggestionCategory}>{suggestion.category}</div>
         </motion.div>
       ))}

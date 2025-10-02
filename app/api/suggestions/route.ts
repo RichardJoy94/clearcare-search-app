@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       const doc = hit.document || {};
       return {
         id: doc.id,
-        title: doc.title,
+        display_name: doc.display_name,
         category: doc.category,
       };
     });

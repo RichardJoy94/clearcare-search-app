@@ -14,11 +14,11 @@ export interface SavedSearch {
   createdBy: string;
   results: Array<{
     id: string;
-    title: string;
+    display_name: string;
     category: string;
     description: string;
-    price_min: number;
-    price_max: number;
+    min_price: number;
+    max_price: number;
     location?: string;
     distance?: number;
   }>;
@@ -68,19 +68,19 @@ export async function saveSearch(userId: string, searchData: Omit<SavedSearch, '
   // Clean and validate each result object
   const cleanedResults = searchData.results.map((result, index) => {
     if (!result.id) throw new Error(`Result at index ${index} is missing id`);
-    if (!result.title) throw new Error(`Result at index ${index} is missing title`);
+    if (!result.display_name) throw new Error(`Result at index ${index} is missing display_name`);
     if (!result.category) throw new Error(`Result at index ${index} is missing category`);
-    if (typeof result.price_min !== 'number') throw new Error(`Result at index ${index} has invalid price_min`);
-    if (typeof result.price_max !== 'number') throw new Error(`Result at index ${index} has invalid price_max`);
+    if (typeof result.min_price !== 'number') throw new Error(`Result at index ${index} has invalid min_price`);
+    if (typeof result.max_price !== 'number') throw new Error(`Result at index ${index} has invalid max_price`);
 
     // Return only the fields we want to store, omitting any undefined values
     return {
       id: result.id,
-      title: result.title,
+      display_name: result.display_name,
       category: result.category,
       description: result.description || '',
-      price_min: result.price_min,
-      price_max: result.price_max,
+      min_price: result.min_price,
+      max_price: result.max_price,
       ...(result.location ? { location: result.location } : {}),
       ...(typeof result.distance === 'number' ? { distance: result.distance } : {})
     };

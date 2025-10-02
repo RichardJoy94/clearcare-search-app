@@ -121,9 +121,9 @@ export default function HomePage() {
   };
 
   const handleSuggestionSelect = (suggestion: SearchSuggestion) => {
-    setSearchInput(suggestion.title);
+    setSearchInput(suggestion.display_name);
     setShowSuggestions(false);
-    handleSearch(suggestion.title);
+    handleSearch(suggestion.display_name);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -184,8 +184,8 @@ export default function HomePage() {
   );
 
   const sortedResults = [...filteredResults].sort((a, b) => {
-    if (sortOrder === 'lowToHigh') return a.price_min - b.price_min;
-    if (sortOrder === 'highToLow') return b.price_min - a.price_min;
+    if (sortOrder === 'lowToHigh') return a.min_price - b.min_price;
+    if (sortOrder === 'highToLow') return b.min_price - a.min_price;
     return 0;
   });
 
@@ -264,10 +264,10 @@ export default function HomePage() {
       // Validate that results have all required fields
       const validResults = results.every(result => 
         result.id && 
-        result.title && 
+        result.display_name && 
         result.category && 
-        typeof result.price_min === 'number' && 
-        typeof result.price_max === 'number'
+        typeof result.min_price === 'number' && 
+        typeof result.max_price === 'number'
       );
 
       if (!validResults) {
@@ -282,11 +282,11 @@ export default function HomePage() {
         filters: [sortOrder].filter(Boolean), // Remove empty filters
         results: results.map(result => ({
           id: result.id,
-          title: result.title,
+          display_name: result.display_name,
           category: result.category,
           description: result.description || '',
-          price_min: Number(result.price_min),
-          price_max: Number(result.price_max),
+          min_price: Number(result.min_price),
+          max_price: Number(result.max_price),
           location: result.location,
           distance: typeof result.distance === 'number' ? result.distance : undefined
         })),
@@ -399,7 +399,7 @@ export default function HomePage() {
                   <h3
                     className={styles.resultTitle}
                     dangerouslySetInnerHTML={{
-                      __html: result._highlight?.title?.[0] || result.title,
+                      __html: result._highlight?.display_name?.[0] || result.display_name,
                     }}
                   />
                   <div className={styles.cardActions}>
@@ -415,7 +415,7 @@ export default function HomePage() {
                     <motion.button
                       className={styles.shareButton}
                       onClick={() => {
-                        const shareUrl = `${window.location.origin}?service=${encodeURIComponent(result.title)}`;
+                        const shareUrl = `${window.location.origin}?service=${encodeURIComponent(result.display_name)}`;
                         navigator.clipboard.writeText(shareUrl).then(() => {
                           setShareTooltip(result.id);
                           setTimeout(() => setShareTooltip(null), 2000);
@@ -463,16 +463,16 @@ export default function HomePage() {
                         <div className={styles.priceRange}>
                           <strong>Cash Price Range:</strong>
                           <span className={styles.priceValue}>
-                            ${Math.floor(result.price_min * 1.2).toLocaleString()} - $
-                            {Math.floor(result.price_max * 1.2).toLocaleString()}
+                            ${Math.floor(result.min_price * 1.2).toLocaleString()} - $
+                            {Math.floor(result.max_price * 1.2).toLocaleString()}
                           </span>
                           <span className={styles.priceBadge}>No Insurance</span>
                         </div>
                         <div className={styles.priceRange}>
                           <strong>Insured Range:</strong>
                           <span className={styles.priceValue}>
-                            ${Math.floor(result.price_min * 0.3).toLocaleString()} - $
-                            {Math.floor(result.price_max * 0.3).toLocaleString()}
+                            ${Math.floor(result.min_price * 0.3).toLocaleString()} - $
+                            {Math.floor(result.max_price * 0.3).toLocaleString()}
                           </span>
                           <span className={styles.priceBadge}>
                             With Insurance
@@ -489,13 +489,13 @@ export default function HomePage() {
                       )}
                       <PricingInsight
                         serviceId={result.id}
-                        serviceName={result.title}
-                        averageCost={Math.floor((result.price_min + result.price_max) / 2)}
+                        serviceName={result.display_name}
+                        averageCost={Math.floor((result.min_price + result.max_price) / 2)}
                         nationalRange={{
-                          min: Math.floor(result.price_min * 0.8),
-                          max: Math.floor(result.price_max * 1.2)
+                          min: Math.floor(result.min_price * 0.8),
+                          max: Math.floor(result.max_price * 1.2)
                         }}
-                        trend={result.price_min > 1000 ? 'up' : result.price_min > 500 ? 'stable' : 'down'}
+                        trend={result.min_price > 1000 ? 'up' : result.min_price > 500 ? 'stable' : 'down'}
                       />
                     </div>
                   }

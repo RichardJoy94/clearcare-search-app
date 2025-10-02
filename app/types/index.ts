@@ -1,10 +1,10 @@
 export interface SearchResult {
   id: string;
-  title: string;
+  display_name: string;
   category: string;
   description: string;
-  price_min: number;
-  price_max: number;
+  min_price: number;
+  max_price: number;
   location?: string;
   distance?: number;
   zipCode?: string;
@@ -14,7 +14,7 @@ export interface SearchResult {
   };
   providerUrl?: string;
   _highlight?: {
-    title?: string[];
+    display_name?: string[];
     description?: string[];
   };
 }
@@ -45,6 +45,6 @@ export interface LocationFilter {
 
 export interface SearchSuggestion {
   id: string;
-  title: string;
+  display_name: string;
   category: string;
 } 
