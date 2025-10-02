@@ -311,7 +311,7 @@ export default function HomePage() {
         category: activeCategory,
         resultsLength: results.length,
         userId: user.uid,
-        results: results.map(r => ({ id: r.id, hasTitle: !!r.title, hasCategory: !!r.category }))
+        results: results.map(r => ({ id: r.id, hasTitle: !!r.display_name, hasCategory: !!r.category }))
       });
       alert('Failed to save search. Please try again');
     }
